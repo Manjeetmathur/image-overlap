@@ -1,6 +1,6 @@
 import express from 'express';
 import { upload } from '../middleware/multer.js';
-import { mergeWithTopBottom } from '../coontrollers/imageMergeController.js';
+import { mergeWithTopBottom } from '../api/imageMergeController.js';
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import { uploadImage } from '../coontrollers/uploadController.js';
+import { uploadImage } from '../api/uploadController.js';
 import { upload } from '../middleware/multer.js';
 
 const router = express.Router();
