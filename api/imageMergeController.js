@@ -18,13 +18,24 @@ export const mergeWithTopBottom = async (req, res) => {
       return res.status(400).json({ message: "No image uploaded" });
     }
 
-    const topImagePath = path.join(__dirname, "../top.png");
-    const bottomImagePath = path.join(__dirname, "../bottom.png");
     const uploadedImagePath = uploadedImage.path;
-
     const middleMeta = await sharp(uploadedImagePath).metadata();
     const imageWidth = middleMeta.width;
     const imageHeight = middleMeta.height;
+
+    // Select overlays based on orientation
+    let topImagePath, bottomImagePath, orientation;
+    if (imageWidth >= imageHeight) {
+      // Landscape
+      topImagePath = path.join(__dirname, "../landscape-top.png");
+      bottomImagePath = path.join(__dirname, "../landscape-bottom.png");
+      orientation = "landscape";
+    } else {
+      // Portrait
+      topImagePath = path.join(__dirname, "../top.png");
+      bottomImagePath = path.join(__dirname, "../bottom.png");
+      orientation = "portrait";
+    }
 
     const topBuffer = await sharp(topImagePath)
       .resize({ width: imageWidth, height: imageHeight, fit: "fill" })
@@ -44,17 +55,17 @@ export const mergeWithTopBottom = async (req, res) => {
     const topBufferSafe =
       topMeta.height > imageHeight
         ? await sharp(topBuffer)
-            .resize({ width: imageWidth, height: imageHeight, fit: "inside" })
-            .png()
-            .toBuffer()
+          .resize({ width: imageWidth, height: imageHeight, fit: "inside" })
+          .png()
+          .toBuffer()
         : topBuffer;
 
     const bottomBufferSafe =
       bottomMeta.height > imageHeight
         ? await sharp(bottomBuffer)
-            .resize({ width: imageWidth, height: imageHeight, fit: "inside" })
-            .png()
-            .toBuffer()
+          .resize({ width: imageWidth, height: imageHeight, fit: "inside" })
+          .png()
+          .toBuffer()
         : bottomBuffer;
 
     const topMetaSafe = await sharp(topBufferSafe).metadata();
@@ -90,6 +101,7 @@ export const mergeWithTopBottom = async (req, res) => {
     res.status(200).json({
       message: "Image merged and uploaded successfully",
       imageUrl: uploadedUrl,
+      orientation: orientation,
     });
   } catch (err) {
     console.error(err);
